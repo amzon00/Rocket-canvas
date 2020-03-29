@@ -26,11 +26,9 @@ function placeRockets(res) {
         let newRocket = new Rocket(Math.floor(rocket.first_stage.fuel_amount_tons), Math.floor(rocket.second_stage.fuel_amount_tons));
         rockets.push(newRocket);
     });
-
     startTimer(rockets);
+    fuelBurn(rockets);
 };
-
-
 
 function displayRockets(rockets) {
     let img = document.getElementById('rocket');
@@ -38,32 +36,32 @@ function displayRockets(rockets) {
     let y = window.innerHeight - 130;
     console.log(rockets);
 
+
     rockets.forEach(rocket => {
         x -= 250;
         let flame = new Image();
         ctx.drawImage(img, x, y);
+        let fuel = rocket.firstStageFuel;
         flame.src = '/assets/thrust.png';
         ctx.font = '40px serif';
-        let fuel = rocket.firstStageFuel;
-        // fuel > 0 ? fuel = rocket.firstStageFuel : fuel = rocket.secondStageFuel;
         ctx.fillText(fuel, x, y);
 
         setInterval(() => {
+            x = window.innerWidth - 230;
             y -= 0.1;
-            ctx.clearRect(0, 0, innerWidth, innerHeight); // <------------------ HOW ???
-            ctx.drawImage(flame, x + 11.5 - Math.random() * 2.3, y + 80)
-            ctx.drawImage(img, x, y);
-            ctx.fillText(fuel, x, y);
+            ctx.clearRect(0, 0, innerWidth, innerHeight);
 
+            rockets.forEach(element => {
+                x -= 250;
+                ctx.drawImage(flame, x + 11.5 - Math.random() * 2.3, y + 80);
+                ctx.drawImage(img, x, y);
+                element.firstStageFuel > 0 ? ctx.fillText(element.firstStageFuel, x, y) : ctx.fillText(element.secondStageFuel, x, y);
+            });
 
             if (y < -200) {
                 y = 900;
             };
         }, -10);
-
-        setInterval(() => {
-            fuel--;
-        }, 1000);
 
 
     });
@@ -83,33 +81,31 @@ function startTimer(rockets) {
             ctx.fillText(count, innerWidth / 2.4, innerHeight / 1.7);
         }
     };
+    setTimeout(() => {
+        let audio = new Audio();
+        audio.src = '/assets/countdown.mp3';
+        audio.play();
+    }, 1000);
     let count = 4;
     let timer = setInterval(() => {
         handleTimer(count)
     }, 1000);
-
 };
 
+function fuelBurn(rockets) {
+    rockets.forEach(element => {
+        setTimeout(() => {
+            setInterval(() => {
+                element.firstStageFuel > 0 ? element.firstStageFuel-- : element.secondStageFuel--;
+                if (element.secondStageFuel === 0) {
+                    destroyRocket(element, rockets);
+                };
+            }, 1000); // <---------------- fuel burn seconds;
+        }, 4000);
+    });
+};
 
-
-
-
-
-
-
-
-
-// var a = 200;
-// var dx = 1;
-// function animate() {
-//     requestAnimationFrame(animate);
-//     ctx.clearRect(0, 0, innerHeight, innerWidth);
-
-//     ctx.beginPath();
-//     ctx.arc(a, 200, 30, 0, Math.PI * 2, false);
-//     ctx.strokeStyle = 'red';
-//     ctx.stroke();
-
-//     a += 1;
-// }
-// animate();
+function destroyRocket(element, rockets) {
+    let index = rockets.indexOf(element);
+    rockets.splice(index, 1);
+};
