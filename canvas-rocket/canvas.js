@@ -30,7 +30,6 @@ function placeRockets(res) {
     });
     startTimer(rockets);
     fuelBurn(rockets);
-    playBackgroundAudio();
 };
 
 function displayRockets(rockets) {
@@ -49,24 +48,37 @@ function displayRockets(rockets) {
         ctx.fillText(fuel, x, y);
         let fuelStation = new Image();
         fuelStation.src = '/assets/fuel-station.png';
-
+        let rocketTop = new Image();
+        rocketTop.src = 'assets/rocket_top.png';
+        
         setInterval(() => {
             x = window.innerWidth - 230;
-            y -= 0.1;
+                y -= 0.1;
+        
             ctx.clearRect(0, 0, innerWidth, innerHeight);
+            
 
             rockets.forEach(element => {
                 x -= 250;
-                ctx.drawImage(flame, x + 11.5 - Math.random() * 2.3, y + 80);
-                ctx.drawImage(rocketImg, x, y);
-                ctx.drawImage(fuelStation, x - 40, y - 68);
-                ctx.fillStyle = 'yellow';
-                element.firstStageFuel > 0 ? ctx.fillText(element.firstStageFuel, x, y - 40) : ctx.fillText(element.secondStageFuel, x, y - 40);
+                if (element.firstStageFuel > 0) {
+                    ctx.drawImage(flame, x + 11.5 - Math.random() * 2.3, y + 80);
+                    ctx.drawImage(rocketImg, x, y);
+                    ctx.drawImage(fuelStation, x - 40, y - 68);
+                    ctx.fillStyle = 'yellow'
+                    ctx.fillText(element.firstStageFuel, x, y - 40)
+                } else {
+                    ctx.drawImage(flame, x + 11.5 - Math.random() * 2.3, y + 50);
+                    ctx.drawImage(rocketTop, x, y);
+                    ctx.drawImage(fuelStation, x - 40, y - 68);
+                    ctx.fillStyle = 'red'
+                    ctx.fillText(element.secondStageFuel, x, y - 40);
+                };
             });
 
             if (y < -200) {
                 y = 900;
             };
+            
         }, -10);
 
     });
@@ -74,13 +86,13 @@ function displayRockets(rockets) {
 
 function fuelBurn(rockets) {
     rockets.forEach(element => {
-        setTimeout(() => { // 4 sec delay because of the timer;
+        setTimeout(() => { 
             setInterval(() => {
                 element.firstStageFuel > 0 ? element.firstStageFuel-- : element.secondStageFuel--;
                 if (element.secondStageFuel === 0) {
                     destroyRocket(element, rockets);
                 };
-            }, 1000); // <-------------------------------fuel burn seconds;
+            }, 1000);
         }, 4000);
     });
 };
@@ -91,17 +103,6 @@ function destroyRocket(element, rockets) {
     if (rockets.length === 0) {
         tryAgain();
     };
-};
-
-let backgroundAudio = new Audio();
-
-function playBackgroundAudio() {
-    setTimeout(() => {
-        backgroundAudio.src = '/assets/dokanNoNaka.mp3';
-        setInterval(() => {
-            backgroundAudio.play();
-        }, 1425);
-    }, 2700);
 };
 
 function startBtn(res) {
@@ -118,12 +119,10 @@ function tryAgain() {
     successHeader.style.display = 'block';
     tryAgainBtn.style.display = 'block';
     tryAgainBtn.addEventListener('click', reload);
-    backgroundAudio.src = '';
 
     function reload() {
         location.reload();
     };
-
 };
 
 function startTimer(rockets) {
